@@ -1,0 +1,35 @@
+version: '3.5'
+
+services:
+  go-skeleton:
+    build: .
+    image: go-skeleton
+    container_name: ${CONTAINER_NAME}
+    working_dir: /go/src/github.com/carantunes/go-skeleton
+    volumes:
+      - ../../:/go/src/github.com/carantunes/go-skeleton:delegated
+      - ~/.ssh:/root/.ssh
+      - ~/.gitconfig:/root/.gitconfig
+    networks:
+      - go-skeleton-network
+    ports:
+      - '${APP_PORT:-8080}:8080'
+    depends_on:
+      - swagger-ui
+    env_file:
+      - .env
+
+  swagger-ui:
+    image: swaggerapi/swagger-ui
+    container_name: swagger-ui
+    restart: on-failure
+    ports:
+      - 8081:8080
+    environment:
+      - BASE_URL=/docs
+      - SWAGGER_JSON=/go-skeleton/cmd/api/spec.json
+    volumes:
+      - ../../:/go-skeleton:delegated
+
+networks:
+  go-skeleton-network:
